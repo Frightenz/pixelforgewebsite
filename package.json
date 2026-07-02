@@ -1,0 +1,9 @@
+{
+  "name": "pixelforgewebsite",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static GitHub Pages website for PixelForge.",
+  "scripts": {
+    "test": "node --test"
+  }
+}
