@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const pages = ["index.html", "privacy.html", "terms.html", "support.html", "404.html"];
+const supportEmail = ["jeffreyburns", "me.com"].join("@");
 
 function read(page) {
   return readFileSync(join(root, page), "utf8");
@@ -54,7 +55,7 @@ test("privacy policy covers App Store review requirements", () => {
     /retention and deletion/i,
     /Consent controls/i,
     /Apple may process App Store purchases/i,
-    /jeffreyburns@me\.com/i
+    /support\.html/i
   ];
 
   for (const pattern of required) {
@@ -62,11 +63,22 @@ test("privacy policy covers App Store review requirements", () => {
   }
 });
 
-test("support and legal pages expose required contact and purchase information", () => {
+test("only the support page exposes the support email address", () => {
+  for (const page of pages.filter((page) => page !== "support.html")) {
+    const html = read(page);
+    assert(!html.includes(supportEmail), `${page} should not show the support email address`);
+    assert.doesNotMatch(html, /mailto:/i, `${page} should not contain direct email links`);
+  }
+
+  const support = read("support.html");
+  assert(support.includes(supportEmail));
+  assert(support.includes(`mailto:${supportEmail}?subject=PixelForge%20Support`));
+});
+
+test("support and legal pages expose required support and purchase information", () => {
   const support = read("support.html");
   const terms = read("terms.html");
 
-  assert.match(support, /mailto:jeffreyburns@me\.com\?subject=PixelForge%20Support/);
   assert.match(support, /App Store Connect Support URL/i);
   assert.match(terms, /Purchases and subscriptions/i);
   assert.match(terms, /Acceptable use/i);
